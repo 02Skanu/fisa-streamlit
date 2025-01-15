@@ -83,3 +83,5 @@ if stock_name:
         right_column.download_button("csv 파일 다운로드", 
             data = csv, file_name='stock_data_to_csv.csv',
             mime = 'text/csv')
+else:
+    print("주식 데이터가 없습니다.")
