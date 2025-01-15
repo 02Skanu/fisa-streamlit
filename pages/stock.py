@@ -10,7 +10,7 @@ import numpy as np
 from bs4 import BeautifulSoup
 import plotly.express as px
 import plotly.figure_factory as ff
-
+from openpyxl import Workbook
 
 # caching
 # 인자가 바뀌지 않는 함수 실행 결과를 저장 후 크롬의 임시 저장 폴더에 저장 후 재사용
@@ -60,12 +60,26 @@ if stock_name:
 
         df.rename(columns = {'index' : 'Date'}, inplace = True)
 
+        fig = go.Figure()
 
-        # df = df.astype({'Date':'datetime64[ns]'})
-        gr = px.line(df, 'Date', 'Close', range_y=[df.Close.min()-1000,df.Close.max()+1000])
-        st.plotly_chart(gr)
-        # excel_data = BytesIO()      
-        # df.to_excel(excel_data)
+        fig.add_trace(go.Line(
+            x= df.Date,
+            y= df.Close,
+        ))
+        fig.update_layout(title_text=f"{stock_name}의 종가 데이터", title_x = 0.5)
+        fig.update_xaxes(title_text='날짜')
+        fig.update_yaxes(title_text='종가', range=[df.Close.min()-1000,df.Close.max()+1000])
 
-        # st.download_button("엑셀 파일 다운로드", 
-        #         excel_data, file_name='stock_data.xlsx')
+        st.plotly_chart(fig, use_container_width = True)
+        excel_data = BytesIO()      
+        df.to_excel(excel_data)
+
+
+        left_column, right_column = st.columns(2)
+
+        left_column.download_button("엑셀 파일 다운로드", 
+                excel_data, file_name='stock_data_to_excel.xlsx')
+        csv = df.to_csv().encode('utf-8')
+        right_column.download_button("csv 파일 다운로드", 
+            data = csv, file_name='stock_data_to_csv.csv',
+            mime = 'text/csv')
